@@ -1,0 +1,916 @@
+name: Create SortingAnalysis tasks
+
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  create-tasks:
+    name: Create labels and testing tasks
+    runs-on: ubuntu-latest
+
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+
+    steps:
+      - name: Create labels
+        run: |
+          gh label create "type: test" --description "Тестирование программы или алгоритма" --color "8250df" --force --repo "$REPO"
+          gh label create "type: docs" --description "Документация пользователя" --color "0969da" --force --repo "$REPO"
+          gh label create "type: report" --description "Отчёт по результатам тестирования" --color "fbca04" --force --repo "$REPO"
+          gh label create "type: bug" --description "Ошибка, найденная во время тестирования" --color "d1242f" --force --repo "$REPO"
+          gh label create "needs review" --description "Нужна проверка преподавателем" --color "d4c5f9" --force --repo "$REPO"
+
+      - name: Create issues
+        run: |
+          create_issue_if_missing() {
+            TITLE="$1"
+            LABELS="$2"
+            BODY="$3"
+
+            EXISTING_URL=$(gh issue list \
+              --repo "$REPO" \
+              --state all \
+              --search "$TITLE in:title" \
+              --json title,url \
+              --jq ".[] | select(.title == \"$TITLE\") | .url" | head -n 1)
+
+            if [ -n "$EXISTING_URL" ]; then
+              echo "Issue already exists: $TITLE"
+              echo "$EXISTING_URL"
+            else
+              echo "Creating issue: $TITLE"
+              gh issue create \
+                --repo "$REPO" \
+                --title "$TITLE" \
+                --label "$LABELS" \
+                --body "$BODY"
+            fi
+          }
+
+          create_issue_if_missing \
+            "Изучить готовую программу SortingAnalysis" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно скачать готовую программу из GitHub Releases, запустить её и изучить интерфейс.
+
+          ## Проверить
+
+          - запускается ли программа;
+          - какие сортировки доступны;
+          - как генерируется массив;
+          - как вводится массив вручную;
+          - как загружается массив из файла;
+          - как сохраняется исходный массив;
+          - как сохраняется отсортированный массив;
+          - выводится ли время сортировки.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          test-results/program-overview.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/program-overview
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/program-overview -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Подготовить план тестирования SortingAnalysis" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно подготовить общий план тестирования программы SortingAnalysis.
+
+          ## В плане должны быть описаны группы данных
+
+          ### Обычный набор данных
+
+          Числа от 0 и выше.
+
+          Размеры массивов:
+
+          \`\`\`text
+          10
+          100
+          1000
+          2000
+          5000
+          10000
+          25000
+          \`\`\`
+
+          ### Необычные наборы данных
+
+          Для каждого необычного набора достаточно размеров:
+
+          \`\`\`text
+          100
+          1000
+          5000
+          \`\`\`
+
+          Наборы:
+
+          - уже отсортированный массив;
+          - массив из 2 уникальных значений;
+          - массив из 3 уникальных значений;
+          - массив из 5 уникальных значений;
+          - массив из 10 уникальных значений;
+          - массив только из отрицательных чисел до 0;
+          - массив из отрицательных и положительных чисел.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          test-results/test-plan.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/test-plan
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/test-plan -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Подготовить тестовые данные для всех групп массивов" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно подготовить файлы с тестовыми массивами в папке \`test-data/\`.
+
+          ## Обычные данные: числа от 0 и выше
+
+          Создать файлы:
+
+          \`\`\`text
+          normal_10.txt
+          normal_100.txt
+          normal_1000.txt
+          normal_2000.txt
+          normal_5000.txt
+          normal_10000.txt
+          normal_25000.txt
+          \`\`\`
+
+          ## Необычные данные
+
+          Для каждого набора создать размеры 100, 1000 и 5000.
+
+          ### Уже отсортированные массивы
+
+          \`\`\`text
+          sorted_100.txt
+          sorted_1000.txt
+          sorted_5000.txt
+          \`\`\`
+
+          ### Массивы из 2 уникальных значений
+
+          \`\`\`text
+          two_values_100.txt
+          two_values_1000.txt
+          two_values_5000.txt
+          \`\`\`
+
+          ### Массивы из 3 уникальных значений
+
+          \`\`\`text
+          three_values_100.txt
+          three_values_1000.txt
+          three_values_5000.txt
+          \`\`\`
+
+          ### Массивы из 5 уникальных значений
+
+          \`\`\`text
+          five_values_100.txt
+          five_values_1000.txt
+          five_values_5000.txt
+          \`\`\`
+
+          ### Массивы из 10 уникальных значений
+
+          \`\`\`text
+          ten_values_100.txt
+          ten_values_1000.txt
+          ten_values_5000.txt
+          \`\`\`
+
+          ### Только отрицательные числа до 0
+
+          \`\`\`text
+          negative_100.txt
+          negative_1000.txt
+          negative_5000.txt
+          \`\`\`
+
+          ### Отрицательные и положительные числа
+
+          \`\`\`text
+          mixed_100.txt
+          mixed_1000.txt
+          mixed_5000.txt
+          \`\`\`
+
+          ## Результат
+
+          Все файлы должны быть добавлены в:
+
+          \`\`\`text
+          test-data/
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/test-data
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/test-data -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Протестировать Bubble Sort" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно протестировать обычную пузырьковую сортировку Bubble Sort.
+
+          ## Обязательные группы данных
+
+          ### Обычный набор: числа от 0 и выше
+
+          Размеры:
+
+          \`\`\`text
+          10
+          100
+          1000
+          2000
+          5000
+          10000
+          25000
+          \`\`\`
+
+          ### Необычные наборы
+
+          Для каждого набора использовать размеры:
+
+          \`\`\`text
+          100
+          1000
+          5000
+          \`\`\`
+
+          Наборы:
+
+          - уже отсортированный массив;
+          - массив из 2 уникальных значений;
+          - массив из 3 уникальных значений;
+          - массив из 5 уникальных значений;
+          - массив из 10 уникальных значений;
+          - только отрицательные числа до 0;
+          - отрицательные и положительные числа.
+
+          ## Зафиксировать
+
+          - корректность результата;
+          - время сортировки;
+          - имя входного файла;
+          - имя файла результата;
+          - ошибки, если появились.
+
+          ## Результат
+
+          Добавить результаты в:
+
+          \`\`\`text
+          test-results/bubble-sort.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/test-bubble-sort
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/test-bubble-sort -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Протестировать Bubble Sort with swap flag" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно протестировать улучшенную пузырьковую сортировку с отслеживанием обменов.
+
+          ## Что проверить
+
+          Использовать те же группы данных, что и для обычного Bubble Sort:
+
+          - обычные числа от 0 и выше на размерах 10, 100, 1000, 2000, 5000, 10000, 25000;
+          - необычные наборы на размерах 100, 1000, 5000.
+
+          ## Особое внимание
+
+          Сравнить с обычным Bubble Sort на уже отсортированных и почти однотипных данных.
+
+          ## Результат
+
+          Добавить результаты в:
+
+          \`\`\`text
+          test-results/bubble-sort-swap-flag.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/test-bubble-sort-swap-flag
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/test-bubble-sort-swap-flag -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Протестировать Cocktail Sort" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно протестировать шейкерную сортировку Cocktail Sort.
+
+          ## Что проверить
+
+          - обычные данные от 0 и выше: 10, 100, 1000, 2000, 5000, 10000, 25000;
+          - необычные данные: 100, 1000, 5000.
+
+          ## Сравнить
+
+          - с Bubble Sort;
+          - с Bubble Sort with swap flag;
+          - на отсортированных данных;
+          - на данных с малым количеством уникальных значений.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          test-results/cocktail-sort.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/test-cocktail-sort
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/test-cocktail-sort -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Протестировать Selection Sort" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно протестировать сортировку выбором Selection Sort.
+
+          ## Что проверить
+
+          - обычные данные от 0 и выше: 10, 100, 1000, 2000, 5000, 10000, 25000;
+          - необычные данные: 100, 1000, 5000.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          test-results/selection-sort.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/test-selection-sort
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/test-selection-sort -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Протестировать Insertion Sort" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно протестировать сортировку вставками Insertion Sort.
+
+          ## Что проверить
+
+          - обычные данные от 0 и выше: 10, 100, 1000, 2000, 5000, 10000, 25000;
+          - необычные данные: 100, 1000, 5000.
+
+          ## Особое внимание
+
+          Проверить поведение на уже отсортированных данных.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          test-results/insertion-sort.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/test-insertion-sort
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/test-insertion-sort -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Протестировать Binary Insertion Sort" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно протестировать сортировку вставками с бинарным поиском места вставки.
+
+          ## Что проверить
+
+          - обычные данные от 0 и выше: 10, 100, 1000, 2000, 5000, 10000, 25000;
+          - необычные данные: 100, 1000, 5000.
+
+          ## Сравнить
+
+          - с обычным Insertion Sort;
+          - по времени;
+          - по поведению на отсортированных данных.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          test-results/binary-insertion-sort.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/test-binary-insertion-sort
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/test-binary-insertion-sort -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Протестировать Merge Sort" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно протестировать сортировку слиянием Merge Sort.
+
+          ## Что проверить
+
+          - обычные данные от 0 и выше: 10, 100, 1000, 2000, 5000, 10000, 25000;
+          - необычные данные: 100, 1000, 5000.
+
+          ## Особое внимание
+
+          Проверить большие размеры массивов и сравнить с простыми сортировками.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          test-results/merge-sort.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/test-merge-sort
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/test-merge-sort -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Протестировать Quick Sort Lomuto" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно протестировать Quick Sort с разбиением Lomuto.
+
+          ## Что проверить
+
+          - обычные данные от 0 и выше: 10, 100, 1000, 2000, 5000, 10000, 25000;
+          - необычные данные: 100, 1000, 5000.
+
+          ## Особое внимание
+
+          Проверить поведение на уже отсортированных данных и данных с малым количеством уникальных значений.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          test-results/quicksort-lomuto.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/test-quicksort-lomuto
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/test-quicksort-lomuto -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Протестировать Quick Sort Hoare" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно протестировать Quick Sort с разбиением Hoare.
+
+          ## Что проверить
+
+          - обычные данные от 0 и выше: 10, 100, 1000, 2000, 5000, 10000, 25000;
+          - необычные данные: 100, 1000, 5000.
+
+          ## Сравнить
+
+          - с Quick Sort Lomuto;
+          - на отсортированных данных;
+          - на данных с 2, 3, 5 и 10 уникальными значениями.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          test-results/quicksort-hoare.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/test-quicksort-hoare
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/test-quicksort-hoare -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Протестировать Heap Sort" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно протестировать пирамидальную сортировку Heap Sort.
+
+          ## Что проверить
+
+          - обычные данные от 0 и выше: 10, 100, 1000, 2000, 5000, 10000, 25000;
+          - необычные данные: 100, 1000, 5000.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          test-results/heap-sort.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/test-heap-sort
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/test-heap-sort -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Протестировать Shell Sort" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно протестировать Shell Sort.
+
+          ## Что проверить
+
+          - обычные данные от 0 и выше: 10, 100, 1000, 2000, 5000, 10000, 25000;
+          - необычные данные: 100, 1000, 5000.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          test-results/shell-sort.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/test-shell-sort
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/test-shell-sort -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Протестировать Counting Sort" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно протестировать сортировку подсчётом Counting Sort.
+
+          ## Что проверить
+
+          - обычные данные от 0 и выше: 10, 100, 1000, 2000, 5000, 10000, 25000;
+          - данные с 2, 3, 5 и 10 уникальными значениями;
+          - только отрицательные числа;
+          - отрицательные и положительные числа.
+
+          ## Особое внимание
+
+          Описать ограничения Counting Sort по диапазону значений.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          test-results/counting-sort.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/test-counting-sort
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/test-counting-sort -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Протестировать Radix Sort" \
+            "type: test,needs review" \
+            "## Описание
+
+          Нужно протестировать поразрядную сортировку Radix Sort.
+
+          ## Что проверить
+
+          - обычные данные от 0 и выше: 10, 100, 1000, 2000, 5000, 10000, 25000;
+          - данные с 2, 3, 5 и 10 уникальными значениями.
+
+          ## Отдельно проверить
+
+          - что происходит на отрицательных числах;
+          - что происходит на смешанном наборе отрицательных и положительных чисел.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          test-results/radix-sort.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/test-radix-sort
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/test-radix-sort -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Проверить обработку ошибок и некорректного ввода" \
+            "type: test,type: bug,needs review" \
+            "## Описание
+
+          Нужно проверить, как программа реагирует на некорректные действия пользователя.
+
+          ## Проверить
+
+          - пустой ввод;
+          - буквы вместо чисел;
+          - смешанный ввод;
+          - отсутствие файла;
+          - пустой файл;
+          - файл с некорректными значениями;
+          - неверный диапазон генерации;
+          - размер массива 0;
+          - отрицательный размер массива;
+          - очень большой размер массива.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          test-results/error-handling-report.md
+          \`\`\`
+
+          Если найдены ошибки, создать отдельные bug issues.
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/error-handling-tests
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/error-handling-tests -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Подготовить пользовательскую документацию" \
+            "type: docs,needs review" \
+            "## Описание
+
+          Нужно написать документацию пользователя по программе SortingAnalysis.
+
+          ## Документация должна содержать
+
+          - где скачать программу из Releases;
+          - как запустить программу;
+          - как сгенерировать массив;
+          - как ввести массив вручную;
+          - как загрузить массив из файла;
+          - как выбрать сортировку;
+          - где сохраняется исходный массив;
+          - где сохраняется отсортированный массив;
+          - как понимать время сортировки;
+          - какие ошибки может увидеть пользователь.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          docs/user-guide.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/user-documentation
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/user-documentation -> main
+          \`\`\`"
+
+          create_issue_if_missing \
+            "Подготовить итоговый отчёт по тестированию SortingAnalysis" \
+            "type: report,needs review" \
+            "## Описание
+
+          Нужно подготовить итоговый отчёт по тестированию программы SortingAnalysis.
+
+          ## Отчёт должен содержать
+
+          - цель тестирования;
+          - список проверенных сортировок;
+          - описание обычного набора данных;
+          - описание необычных наборов данных;
+          - таблицы результатов по каждой сортировке;
+          - сравнение сортировок;
+          - найденные ошибки;
+          - выводы.
+
+          ## Обязательные таблицы
+
+          ### Таблица для обычного набора данных
+
+          \`\`\`text
+          Алгоритм | Размер | Время | Корректность | Файл результата | Комментарий
+          \`\`\`
+
+          Размеры:
+
+          \`\`\`text
+          10, 100, 1000, 2000, 5000, 10000, 25000
+          \`\`\`
+
+          ### Таблица для необычных наборов данных
+
+          \`\`\`text
+          Алгоритм | Тип данных | Размер | Время | Корректность | Файл результата | Комментарий
+          \`\`\`
+
+          Размеры:
+
+          \`\`\`text
+          100, 1000, 5000
+          \`\`\`
+
+          Типы данных:
+
+          - уже отсортированный массив;
+          - 2 уникальных значения;
+          - 3 уникальных значения;
+          - 5 уникальных значений;
+          - 10 уникальных значений;
+          - только отрицательные числа;
+          - отрицательные и положительные числа.
+
+          ## Результат
+
+          Создать файл:
+
+          \`\`\`text
+          docs/final-testing-report.md
+          \`\`\`
+
+          ## Ветка
+
+          \`\`\`bash
+          feature/final-testing-report
+          \`\`\`
+
+          ## Pull Request
+
+          \`\`\`text
+          feature/final-testing-report -> main
+          \`\`\`"
