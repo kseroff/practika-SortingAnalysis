@@ -3,10 +3,18 @@
 #include <algorithm>
 #include <iostream>
 #include <random>
+#include <stdexcept>
 #include <vector>
 
 namespace ArrayUtils {
     inline std::vector<int> generateRandomArray(int size, int minValue, int maxValue) {
+        if (size < 0) {
+            throw std::runtime_error("Размер массива не может быть отрицательным.");
+        }
+        if (minValue > maxValue) {
+            std::swap(minValue, maxValue);
+        }
+
         std::random_device rd;
         std::mt19937 generator(rd());
         std::uniform_int_distribution<int> distribution(minValue, maxValue);
@@ -18,6 +26,39 @@ namespace ArrayUtils {
             array.push_back(distribution(generator));
         }
 
+        return array;
+    }
+
+    inline std::vector<int> generateSortedArray(int size) {
+        if (size < 0) {
+            throw std::runtime_error("Размер массива не может быть отрицательным.");
+        }
+
+        std::vector<int> array;
+        array.reserve(static_cast<std::size_t>(size));
+        for (int i = 0; i < size; ++i) {
+            array.push_back(i);
+        }
+        return array;
+    }
+
+    inline std::vector<int> generateLimitedValuesArray(int size, int uniqueValueCount) {
+        if (size < 0) {
+            throw std::runtime_error("Размер массива не может быть отрицательным.");
+        }
+        if (uniqueValueCount <= 0) {
+            throw std::runtime_error("Количество уникальных значений должно быть положительным.");
+        }
+
+        std::random_device rd;
+        std::mt19937 generator(rd());
+        std::uniform_int_distribution<int> distribution(0, uniqueValueCount - 1);
+
+        std::vector<int> array;
+        array.reserve(static_cast<std::size_t>(size));
+        for (int i = 0; i < size; ++i) {
+            array.push_back(distribution(generator));
+        }
         return array;
     }
 
