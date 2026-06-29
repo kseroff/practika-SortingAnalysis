@@ -9,11 +9,9 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
-
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
 #endif
-
 #include <windows.h>
 #endif
 
@@ -22,12 +20,9 @@ namespace Console {
 #ifdef _WIN32
         SetConsoleCP(CP_UTF8);
         SetConsoleOutputCP(CP_UTF8);
-
         std::system("chcp 65001 > nul");
 #endif
-
         std::setlocale(LC_ALL, ".UTF-8");
-
         std::cin.clear();
         std::cout.clear();
     }
@@ -46,7 +41,7 @@ namespace Console {
         std::getline(std::cin, temp);
     }
 
-    inline void printLine(char symbol = '-', int count = 60) {
+    inline void printLine(char symbol = '-', int count = 70) {
         for (int i = 0; i < count; ++i) {
             std::cout << symbol;
         }

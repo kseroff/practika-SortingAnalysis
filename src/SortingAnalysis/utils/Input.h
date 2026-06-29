@@ -61,6 +61,27 @@ namespace Input {
         }
     }
 
+    inline bool readYesNo(const std::string& prompt) {
+        while (true) {
+            std::cout << prompt << " [y/n]: ";
+            std::string line;
+            std::getline(std::cin, line);
+            line = StringUtils::trim(line);
+
+            if (line == "y" || line == "Y" || line == "yes" || line == "Yes" ||
+                line == "д" || line == "Д" || line == "да" || line == "Да") {
+                return true;
+            }
+
+            if (line == "n" || line == "N" || line == "no" || line == "No" ||
+                line == "н" || line == "Н" || line == "нет" || line == "Нет") {
+                return false;
+            }
+
+            std::cout << "Введите y/д для согласия или n/н для отказа.\n";
+        }
+    }
+
     inline std::vector<int> readArrayFromLine() {
         while (true) {
             std::cout << "Введите целые числа через пробел: ";
