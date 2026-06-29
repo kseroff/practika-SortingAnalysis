@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <iostream>
 #include <random>
 #include <vector>
@@ -29,7 +30,7 @@ namespace ArrayUtils {
         std::cout << "Размер массива: " << array.size() << '\n';
         std::cout << "Значения: ";
 
-        std::size_t limit = std::min(array.size(), maxToPrint);
+        std::size_t limit = (std::min)(array.size(), maxToPrint);
         for (std::size_t i = 0; i < limit; ++i) {
             std::cout << array[i];
             if (i + 1 < limit) {

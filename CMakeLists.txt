@@ -34,6 +34,13 @@ target_include_directories(SortingAnalysis PRIVATE
 
 target_compile_features(SortingAnalysis PRIVATE cxx_std_17)
 
+# Prevent Windows.h from defining min/max macros that break std::min, std::max
+# and std::numeric_limits<T>::min()/max() in MSVC builds.
+target_compile_definitions(SortingAnalysis PRIVATE
+    NOMINMAX
+    WIN32_LEAN_AND_MEAN
+)
+
 # Better UTF-8 support in Visual Studio/MSVC builds.
 if (MSVC)
     target_compile_options(SortingAnalysis PRIVATE /utf-8 /W4)

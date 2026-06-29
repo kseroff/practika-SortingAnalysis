@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cctype>
 #include <iostream>
 #include <limits>
 #include <sstream>
@@ -26,7 +27,7 @@ namespace Input {
             return false;
         }
 
-        if (temp < std::numeric_limits<int>::min() || temp > std::numeric_limits<int>::max()) {
+        if (temp < (std::numeric_limits<int>::min)() || temp > (std::numeric_limits<int>::max)()) {
             return false;
         }
 
