@@ -1,0 +1,7 @@
+Это не файл проекта Visual Studio. Это структура исходников.
+
+В Visual Studio 2022:
+1. Создайте Console App C++ с названием SortingAnalysis.
+2. Скопируйте папки core, utils, sorts и main.cpp рядом с проектом.
+3. Добавьте файлы в проект через Add -> Existing Item.
+4. Project Properties -> C/C++ -> Language -> C++ Language Standard -> ISO C++17.
